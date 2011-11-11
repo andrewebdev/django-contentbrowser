@@ -1,0 +1,29 @@
+{% comment %}
+	You can override this template to customize the styles and layout if you
+	wish.
+{% endcomment %}
+
+<div id="contentbrowser">
+	<div id="cb_types_panel">
+		<ul>
+			{% for type in contenttypes %}
+			<li>
+				<input type="checkbox" name="{{ type.contenttype }}" id="id_{{ type.contenttype }}" />
+				<label for="id_{{ type.contenttype }}">{{ type.name }}</a>
+			</li>
+			{% endfor %}
+		</ul>
+	</div>
+
+	<div id="cb_items_panel">
+	</div>
+
+	<div id="cb_actions_panel">
+	</div>
+
+	<div id="cb_display_panel">
+	</div>
+
+	<div id="cb_filter_panel">
+	</div>
+</div>
