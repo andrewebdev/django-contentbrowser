@@ -23,9 +23,9 @@ class ContentBrowser(object):
 			[{'contenttype': 'app.model', 'verbose_name': '', 'verbose_name_plural': ''}, ... ]
 		"""
 		if not self._cached_types or flush:
+			self._cached_types = []
+			
 			for ctype in self._registered_types:
-				self._cached_types = []
-
 				app, model_name = ctype.split('.')
 				ct = ContentType.objects.get(app_label=app, model=model_name)	
 				ct_model = ct.model_class()

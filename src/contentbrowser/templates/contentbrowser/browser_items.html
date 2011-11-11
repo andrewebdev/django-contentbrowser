@@ -1,4 +1,23 @@
 {% comment %}
 	A template that can be modified by the developer based on how he/she wants
 	the content types to be represented in the browser.
+
+	Copy this template to the same location in your project templates, and
+	start adding the custom html for your types.
+
+	The registered content items are passed to the context with the names
+	generated as: '<app_label>_<model>_items' (all lowercase)
+
 {% endcomment %}
+
+
+{# Example #}
+
+{% if contentbrowser_demomodel_items %}
+	{# ... html to render the here here ... #}
+{% endif %}
+
+
+{% if someapp_somemodel_items %}
+	{# ... html to render the type here ... #}
+{% endif %}

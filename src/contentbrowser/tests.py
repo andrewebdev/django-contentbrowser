@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.test.client import RequestFactory, Client
 from django.db import models
+from django.core.urlresolvers import reverse
 from django.conf import settings
 
 from core import ContentBrowser
@@ -14,8 +15,11 @@ class DemoModel(models.Model):
 	description = models.TextField()
 	is_visible = models.BooleanField(default=False)
 
+class SecondDemoModel(models.Model):
+	name = models.CharField(max_length=20)
+	is_visible = models.BooleanField(default=True)
 
-CONTENT_BROWSER_TYPES = ('contentbrowser.demomodel',)
+CONTENT_BROWSER_TYPES = ('contentbrowser.demomodel', 'contentbrowser.seconddemomodel')
 
 
 ## Commence tests :)
@@ -41,7 +45,9 @@ class ContentBrowserTestCase(TestCase):
 
 	def test_content_browser_models_registered_on_init(self):
 		cb = ContentBrowser(custom_types=CONTENT_BROWSER_TYPES)
-		self.assertEqual(('contentbrowser.demomodel',), cb._registered_types)
+		self.assertEqual(
+			('contentbrowser.demomodel', 'contentbrowser.seconddemomodel'),
+			cb._registered_types)
 
 	def test_get_categories(self):
 		expected_list = [
@@ -49,6 +55,11 @@ class ContentBrowserTestCase(TestCase):
 				'contenttype': 'contentbrowser.demomodel',
 				'verbose_name': 'Demo Model',
 				'verbose_name_plural': 'Demo Models'
+			},
+			{
+				'contenttype': 'contentbrowser.seconddemomodel',
+				'verbose_name': 'Second Demo Model',
+				'verbose_name_plural': 'Second Demo Models'
 			}
 		]
 		self.assertEqual(expected_list, self.cb.get_types())
@@ -112,7 +123,7 @@ class BrowserItemsViewTestCase(TestCase):
 
 	def test_browser_items_with_ctypes(self):
 		rf = RequestFactory()
-		response = BrowserItemsView.as_view()(rf.get('/?ctypes=contentbrowser.demomodel'))
+		response = BrowserItemsView.as_view()(rf.get('/?ctype=contentbrowser.demomodel'))
 
 		expected_items = [1, 2, 3]
 
@@ -125,6 +136,9 @@ class BrowserItemsViewTestCase(TestCase):
 
 class BrowserItemsURLTestCase(TestCase):
 	urls = 'contentbrowser.urls'
+
+	def test_reverse_lookup(self):
+		self.assertEqual('/browse/items/', reverse('contentbrowser_browse_items'))
 
 	def test_browser_items_url(self):
 		c = Client()
