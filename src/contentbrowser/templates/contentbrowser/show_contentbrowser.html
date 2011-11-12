@@ -65,7 +65,7 @@
     function open_b() { return '{'+'{'+'{'; }
     function close_b() { return '}'+'}'+'}'; }
 
-    function cb_take_action(item_attrs) {
+    function cb_take_action(item_attrs, el) {
         var ctype = item_attrs.slice(0,2).join('.');
 
         {% comment %}
@@ -83,8 +83,9 @@
         });
 
         django.jQuery('#cb_items_panel a').live('click', function() {
-            var attrs = django.jQuery(this).parent().attr('id').split('_');
-            cb_take_action(attrs);
+            var el = django.jQuery(this),
+                attrs = el.parent().attr('id').split('_');
+            cb_take_action(attrs, el);
             return false;
         });
 
