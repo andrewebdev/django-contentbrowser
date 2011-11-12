@@ -1,44 +1,106 @@
 {% comment %}
-	You can override this template to customize the styles and layout if you
-	wish.
+    You can override this template to customize the styles and layout if you
+    wish.
 {% endcomment %}
 
-<div id="contentbrowser">
-	<div id="cb_actions_panel">
-		<button id="cb_toggle_panels">Hide/Show</button>
-	</div>
+{% load adminmedia %}
+{% load static %}
 
-	<div id="cb_types_panel" class="column span-4">
-		<ul>
-			{% for type in contenttypes %}
-			<li id="ct_{{ type.contenttype }}"> <a href="#">{{ type.name }}</a> </li>
-			{% endfor %}
-		</ul>
-	</div>
+<div id="contentbrowser" class="column span-flexible">
+    <div id="cb_actions_panel">
+        <button id="cb_toggle_panels">Hide/Show</button>
+    </div>
 
-	<div id="cb_items_panel" class="column span-flexible">
-	</div>
+    <div id="cb_types_panel" class="column span-4">
+        <ul>
+            {% for type in contenttypes %}
+            <li id="ct_{{ type.contenttype }}"> <a href="#">{{ type.name }}</a> </li>
+            {% endfor %}
+        </ul>
+    </div>
 
-	<div id="cb_display_panel">
-	</div>
+    <div id="cb_items_panel" class="column span-flexible">
+    </div>
 
-	<div id="cb_filter_panel">
-	</div>
+    <div id="cb_display_panel">
+    </div>
+
+    <div id="cb_filter_panel">
+    </div>
 </div>
 
 <script type="text/javascript" charset="utf-8">
-	django.jQuery(document).ready(function() {
-		django.jQuery('#cb_types_panel a').click(function() {
-			var ct = django.jQuery(this).parent().attr('id').substr(3);
-			django.jQuery('#cb_types_panel li a').removeClass('selected');
-			django.jQuery(this).addClass('selected');
-			django.jQuery.ajax({
-				url: '{% url contentbrowser_browse_items %}?ctype=' + ct,
-				success: function(data) {
-					django.jQuery('#cb_items_panel').html(data);
-				}
-			});
-			return false;
-		});
-	});
+    django.jQuery.fn.extend({
+        insertAtCaret: function(myValue){
+            return this.each(function(i) {
+                if (document.selection) {
+                    //For browsers like Internet Explorer
+                    this.focus();
+                    sel = document.selection.createRange();
+                    sel.text = myValue;
+                    this.focus();
+                }
+                else if (this.selectionStart || this.selectionStart == '0') {
+                    //For browsers like Firefox and Webkit based
+                    var startPos = this.selectionStart;
+                    var endPos = this.selectionEnd;
+                    var scrollTop = this.scrollTop;
+                    this.value = this.value.substring(0, startPos)+myValue+this.value.substring(endPos,this.value.length);
+                    this.focus();
+                    this.selectionStart = startPos + myValue.length;
+                    this.selectionEnd = startPos + myValue.length;
+                    this.scrollTop = scrollTop;
+                } else {
+                    this.value += myValue;
+                    this.focus();
+                }
+            });
+        }
+    });
+    
+    function show_loader(container) {
+        django.jQuery(container).empty().html('<div style="text-align:center;"><img src="{% get_static_prefix %}contentbrowser/img/ajax-loader.gif" /></div>');
+    }
+
+    function open_b() { return '{'+'{'+'{'; }
+    function close_b() { return '}'+'}'+'}'; }
+
+    function cb_take_action(item_attrs) {
+        var ctype = item_attrs.slice(0,2).join('.');
+
+        {% comment %}
+            Add your code here that will check what content type was clicked on,
+            and then decide what to with the item
+        {% endcomment %}
+    }
+
+    django.jQuery(document).ready(function() {
+
+        django.jQuery('#cb_toggle_panels').click(function() {
+            django.jQuery('#cb_types_panel, #cb_items_panel, #cb_display_panel, #cb_filter_panel')
+                .toggle(300);
+            return false;
+        });
+
+        django.jQuery('#cb_items_panel a').live('click', function() {
+            var attrs = django.jQuery(this).parent().attr('id').split('_');
+            cb_take_action(attrs);
+            return false;
+        });
+
+        django.jQuery('#cb_types_panel a').click(function() {
+            var ct = django.jQuery(this).parent().attr('id').substr(3);
+            django.jQuery('#cb_types_panel li a').removeClass('selected');
+            django.jQuery(this).addClass('selected');
+            show_loader('#cb_items_panel');
+            django.jQuery.ajax({
+                url: '{% url contentbrowser_browse_items %}?ctype=' + ct,
+                success: function(data) {
+                    django.jQuery('#cb_items_panel').empty().html(data);
+                }
+            });
+            return false;
+        });
+
+    });
 </script>
