@@ -5,7 +5,7 @@
 
 {% endcomment %}
 
-{% load adminmedia %}
+{% load adminmedia static %}
 
 <style type="text/css">
     #contentbrowser, #cb_actions_panel,
@@ -24,10 +24,11 @@
     }
 
     #cb_actions_panel {
-        padding: 0.25em;
-        margin-bottom: 0.5em;
-        border: 1px solid #aaa;
-        background-color: white;
+    }
+
+    #cb_actions_panel button {
+        width: 100%;
+        margin-bottom: 1px;
     }
 
     #cb_types_panel {
@@ -53,5 +54,97 @@
         padding: 1em;
         background: white;
         border: 1px solid #aaa;
+        overflow: auto;
+        max-height: 250px;
     }
+
+    div.thumbnail_item {
+        position: relative;
+        float: left;
+        margin: 1em;
+    }
+
+    /* Hide panels when they are initially loaded */
+    #cb_types_panel, #cb_items_panel, #cb_display_panel, #cb_filter_panel {
+        display: none;
+    }
+
 </style>
+
+<script type="text/javascript" charset="utf-8">
+    django.jQuery.fn.extend({
+        insertAtCaret: function(myValue){
+            return this.each(function(i) {
+                if (document.selection) {
+                    //For browsers like Internet Explorer
+                    this.focus();
+                    sel = document.selection.createRange();
+                    sel.text = myValue;
+                    this.focus();
+                }
+                else if (this.selectionStart || this.selectionStart == '0') {
+                    //For browsers like Firefox and Webkit based
+                    var startPos = this.selectionStart;
+                    var endPos = this.selectionEnd;
+                    var scrollTop = this.scrollTop;
+                    this.value = this.value.substring(0, startPos)+myValue+this.value.substring(endPos,this.value.length);
+                    this.focus();
+                    this.selectionStart = startPos + myValue.length;
+                    this.selectionEnd = startPos + myValue.length;
+                    this.scrollTop = scrollTop;
+                } else {
+                    this.value += myValue;
+                    this.focus();
+                }
+            });
+        }
+    });
+    
+    function show_loader(container) {
+        django.jQuery(container).empty().html('<div style="text-align:center;"><img src="{% get_static_prefix %}contentbrowser/img/ajax-loader.gif" /></div>');
+    }
+
+    function open_b() { return '{'+'{'+'{'; }
+    function close_b() { return '}'+'}'+'}'; }
+
+    function cb_take_action(item_attrs, jqitem) {
+        var ctype = item_attrs.slice(0,2).join('.');
+
+        {% comment %}
+            Add your custom actions here, using a switch/case statement
+            is quite handy to take different actions based on the ctype
+        {% endcomment %}
+        
+    }
+
+    django.jQuery(document).ready(function() {
+
+        django.jQuery('#cb_toggle_panels').click(function() {
+            django.jQuery('#cb_types_panel, #cb_items_panel, #cb_display_panel, #cb_filter_panel')
+                .toggle(300);
+            return false;
+        });
+
+        django.jQuery('#cb_items_panel a').live('click', function() {
+            var jqitem = django.jQuery(this),
+                attrs = jqitem.parent().attr('id').split('_');
+            cb_take_action(attrs, jqitem);
+            return false;
+        });
+
+        django.jQuery('#cb_types_panel a').click(function() {
+            var ct = django.jQuery(this).parent().attr('id').substr(3);
+            django.jQuery('#cb_types_panel li a').removeClass('selected');
+            django.jQuery(this).addClass('selected');
+            show_loader('#cb_items_panel');
+            django.jQuery.ajax({
+                url: '{% url contentbrowser_browse_items %}?ctype=' + ct,
+                success: function(data) {
+                    django.jQuery('#cb_items_panel').empty().html(data);
+                }
+            });
+            return false;
+        });
+
+    });
+</script>
