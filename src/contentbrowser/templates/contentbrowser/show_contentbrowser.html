@@ -4,7 +4,11 @@
 {% endcomment %}
 
 <div id="contentbrowser">
-	<div id="cb_types_panel">
+	<div id="cb_actions_panel">
+		<button id="cb_toggle_panels">Hide/Show</button>
+	</div>
+
+	<div id="cb_types_panel" class="column span-4">
 		<ul>
 			{% for type in contenttypes %}
 			<li id="ct_{{ type.contenttype }}"> <a href="#">{{ type.name }}</a> </li>
@@ -12,10 +16,7 @@
 		</ul>
 	</div>
 
-	<div id="cb_items_panel">
-	</div>
-
-	<div id="cb_actions_panel">
+	<div id="cb_items_panel" class="column span-flexible">
 	</div>
 
 	<div id="cb_display_panel">
@@ -29,7 +30,7 @@
 	django.jQuery(document).ready(function() {
 		django.jQuery('#cb_types_panel a').click(function() {
 			var ct = django.jQuery(this).parent().attr('id').substr(3);
-			django.jQuery('#cb_types_panel li').removeClass('selected');
+			django.jQuery('#cb_types_panel li a').removeClass('selected');
 			django.jQuery(this).addClass('selected');
 			django.jQuery.ajax({
 				url: '{% url contentbrowser_browse_items %}?ctype=' + ct,

@@ -1,0 +1,55 @@
+{% comment %}
+
+	Note that the styles used here has been optimised for use with Grappelli.
+	You can override this template if you wish to change this.
+
+{% endcomment %}
+
+<style type="text/css">
+	#contentbrowser, #cb_actions_panel,
+	#cb_types_panel, #cb_types_panel li, #cb_types_panel a,
+	#cb_items_panel {
+		-webkit-border-radius: 5px;
+		-moz-border-radius: 5px;
+		-o-border-radius: 5px;
+		border-radius: 5px;
+	}
+
+	#contentbrowser {
+		width: 80%;
+		overflow: hidden;	
+		padding: 1em 0;
+	}
+
+	#cb_actions_panel {
+		padding: 0.25em;
+		background-color: white;
+		margin-bottom: 0.5em;
+		border: 1px solid #aaa;
+	}
+
+	#cb_types_panel {
+		padding: 5px;
+		background-color: #444;
+	}
+
+	#cb_types_panel li {
+		background-color: white;
+		margin-bottom: 1px;
+	}
+
+	#cb_types_panel a, #cb_types_panel a:visited {
+		display: block;
+		padding: 0.5em 1em;
+	}
+	#cb_types_panel a.selected {
+		background-color: #309BBF;
+		color: white;
+	}
+
+	#cb_items_panel {
+		padding: 1em;
+		background: white;
+		border: 1px solid #aaa;
+	}
+</style>
