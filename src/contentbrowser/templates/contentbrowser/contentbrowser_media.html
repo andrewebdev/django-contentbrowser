@@ -1,134 +1,49 @@
-{% comment %}
-
-    Note that the styles used here has been optimised for use with Grappelli.
-    You can override this template if you wish to change this.
-
-{% endcomment %}
 
 {% load adminmedia static %}
 
-<style type="text/css">
-    #contentbrowser, #cb_actions_panel,
-    #cb_types_panel, #cb_types_panel li, #cb_types_panel a,
-    #cb_items_panel {
-        -webkit-border-radius: 5px;
-        -moz-border-radius: 5px;
-        -o-border-radius: 5px;
-        border-radius: 5px;
-    }
+<link rel="stylesheet" media="screen" type="text/css" href="{% get_static_prefix %}contentbrowser/css/cb.css" />
 
-    #contentbrowser {
-        width: 80%;
-        overflow: hidden;   
-        padding: 1em 0;
-    }
-
-    #cb_actions_panel {
-    }
-
-    #cb_actions_panel button {
-        width: 100%;
-        margin-bottom: 1px;
-    }
-
-    #cb_types_panel {
-        padding: 5px;
-        background-color: #444;
-    }
-
-    #cb_types_panel li {
-        background-color: white;
-        margin-bottom: 1px;
-    }
-
-    #cb_types_panel a, #cb_types_panel a:visited {
-        display: block;
-        padding: 0.5em 1em;
-    }
-    #cb_types_panel a.selected {
-        background-color: #309BBF;
-        color: white;
-    }
-
-    #cb_items_panel {
-        padding: 1em;
-        background: white;
-        border: 1px solid #aaa;
-        overflow: auto;
-        max-height: 250px;
-    }
-
-    div.thumbnail_item {
-        position: relative;
-        float: left;
-        margin: 1em;
-    }
-
-    /* Hide panels when they are initially loaded */
-    #cb_types_panel, #cb_items_panel, #cb_display_panel, #cb_filter_panel {
-        display: none;
-    }
-
-</style>
+{% if CB_ACTIONS_PATH %}
+<script src="{% get_static_prefix %}{{ CB_ACTIONS_PATH }}" type="text/javascript" charset="utf-8"></script>
+{% else %}
+<script src="{% get_static_prefix %}js/cb_actions.js" type="text/javascript" charset="utf-8"></script>
+{% endif %}
 
 <script type="text/javascript" charset="utf-8">
-    django.jQuery.fn.extend({
-        insertAtCaret: function(myValue){
-            return this.each(function(i) {
-                if (document.selection) {
-                    //For browsers like Internet Explorer
-                    this.focus();
-                    sel = document.selection.createRange();
-                    sel.text = myValue;
-                    this.focus();
-                }
-                else if (this.selectionStart || this.selectionStart == '0') {
-                    //For browsers like Firefox and Webkit based
-                    var startPos = this.selectionStart;
-                    var endPos = this.selectionEnd;
-                    var scrollTop = this.scrollTop;
-                    this.value = this.value.substring(0, startPos)+myValue+this.value.substring(endPos,this.value.length);
-                    this.focus();
-                    this.selectionStart = startPos + myValue.length;
-                    this.selectionEnd = startPos + myValue.length;
-                    this.scrollTop = scrollTop;
-                } else {
-                    this.value += myValue;
-                    this.focus();
-                }
-            });
+
+    function ContentBrowser(options) {
+        var self = this,
+            defaultOptions = {
+                cb_actions: {}
+            };
+
+        /** Extend the default options **/
+        if (typeof options === 'object') {
+            options = $.extend(defaultOptions, options);
+        } else {
+            options = defaultOptions;
         }
-    });
+
+        /** Private parts **/
+
+        /** Public parts **/
+        this.takeAction = function(action, el) {
+            return options.cb_actions[action](django.jQuery(el));
+        };
+        
+    }
     
     function show_loader(container) {
         django.jQuery(container).empty().html('<div style="text-align:center;"><img src="{% get_static_prefix %}contentbrowser/img/ajax-loader.gif" /></div>');
     }
 
-    function open_b() { return '{'+'{'+'{'; }
-    function close_b() { return '}'+'}'+'}'; }
-
-    function cb_take_action(item_attrs, jqitem) {
-        var ctype = item_attrs.slice(0,2).join('.');
-
-        {% comment %}
-            Add your custom actions here, using a switch/case statement
-            is quite handy to take different actions based on the ctype
-        {% endcomment %}
-        
-    }
 
     django.jQuery(document).ready(function() {
+        cb = new ContentBrowser({ cb_actions: cb_actions });
 
         django.jQuery('#cb_toggle_panels').click(function() {
             django.jQuery('#cb_types_panel, #cb_items_panel, #cb_display_panel, #cb_filter_panel')
                 .toggle(300);
-            return false;
-        });
-
-        django.jQuery('#cb_items_panel a').live('click', function() {
-            var jqitem = django.jQuery(this),
-                attrs = jqitem.parent().attr('id').split('_');
-            cb_take_action(attrs, jqitem);
             return false;
         });
 

@@ -1,0 +1,60 @@
+#contentbrowser, #cb_actions_panel,
+#cb_types_panel, #cb_types_panel li, #cb_types_panel a,
+#cb_items_panel {
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+}
+
+#contentbrowser {
+    width: 80%;
+    overflow: hidden;   
+    padding: 1em 0;
+}
+
+#cb_actions_panel {
+}
+
+#cb_actions_panel button {
+    width: 100%;
+    margin-bottom: 1px;
+}
+
+#cb_types_panel {
+    padding: 5px;
+    background-color: #444;
+}
+
+#cb_types_panel li {
+    background-color: white;
+    margin-bottom: 1px;
+}
+
+#cb_types_panel a, #cb_types_panel a:visited {
+    display: block;
+    padding: 0.5em 1em;
+}
+#cb_types_panel a.selected {
+    background-color: #309BBF;
+    color: white;
+}
+
+#cb_items_panel {
+    padding: 1em;
+    background: white;
+    border: 1px solid #aaa;
+    overflow: auto;
+    max-height: 250px;
+}
+
+div.thumbnail_item {
+    position: relative;
+    float: left;
+    margin: 1em;
+}
+
+/* Hide panels when they are initially loaded */
+#cb_types_panel, #cb_items_panel, #cb_display_panel, #cb_filter_panel {
+    display: none;
+}
