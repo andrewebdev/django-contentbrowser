@@ -12,7 +12,11 @@
     <div id="cb_types_panel" class="column span-4">
         <ul>
             {% for type in contenttypes %}
-            <li id="ct_{{ type.contenttype }}"> <a href="#">{{ type.name }}</a> </li>
+            <li id="ct_{{ type.contenttype }}">
+                <a href="{% url contentbrowser_browse_items %}?ctype={{ type.contenttype }}">
+                    {{ type.name }}
+                </a>
+            </li>
             {% endfor %}
         </ul>
     </div>
