@@ -1,9 +1,7 @@
 
 function ContentBrowser(options) {
     var self = this,
-        defaultOptions = {
-            cb_actions: {}
-        };
+        defaultOptions = {};
 
     /** Extend the default options **/
     if (typeof options === 'object') {
@@ -22,7 +20,7 @@ function ContentBrowser(options) {
     }
 
     this.takeAction = function(action, el) {
-        return options.cb_actions[action](django.jQuery(el));
+        return cb_actions[action](django.jQuery(el));
     };
     
     this.loadItems = function(url) {
