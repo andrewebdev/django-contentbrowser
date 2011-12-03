@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.test.client import RequestFactory, Client
 from django.db import models
+from django.contrib.auth.models import User, Group
 from django.core.urlresolvers import reverse
 from django.conf import settings
 
@@ -9,7 +10,7 @@ from views import BrowserItemsView
 from templatetags.contentbrowser_tags import show_contentbrowser
 
 
-## Create a test model that we can use
+## Create some test models that we can use
 class DemoModel(models.Model):
 	name = models.CharField(max_length=100)
 	description = models.TextField()
@@ -102,7 +103,11 @@ class ContentBrowserInclusionTagTestCase(TestCase):
 
 class BrowserItemsViewTestCase(TestCase):
 
+	urls = 'contentbrowser.urls'
+
 	def setUp(self):
+		settings.CONTENT_BROWSER_RESTRICTED_TO = None
+
 		DemoModel.objects.create(
 			name='Demo 1', description='Demo 1 Description', is_visible=True)
 		DemoModel.objects.create(
@@ -110,20 +115,37 @@ class BrowserItemsViewTestCase(TestCase):
 		DemoModel.objects.create(
 			name='Demo 2', description='Demo 2 Description', is_visible=False)
 
+		# Create a test user instance
+		self.user = User.objects.create(username='user1', password='secret')
+		self.user.save()
+
 		## Make sure the ContentBrowser is completely empty
 		self.cb = ContentBrowser(custom_types=CONTENT_BROWSER_TYPES)
 
 	def test_browser_items_view_exists(self):
 		items_view = BrowserItemsView()
 
+	def test_browser_items_view_status(self):
+		rf = RequestFactory()
+		request = rf.get('/')
+		request.user = self.user
+
+		response = BrowserItemsView.as_view()(request)
+		self.assertEqual(200, response.status_code)
+
 	def test_browser_items_view_context(self):
 		rf = RequestFactory()
-		response = BrowserItemsView.as_view()(rf.get('/'))
+		request = rf.get('/')
+		request.user = self.user
+
+		response = BrowserItemsView.as_view()(request)
 		self.assertEqual(True, response.context_data['empty_items'])
 
 	def test_browser_items_with_ctypes(self):
 		rf = RequestFactory()
-		response = BrowserItemsView.as_view()(rf.get('/?ctype=contentbrowser.demomodel'))
+		request = rf.get('/?ctype=contentbrowser.demomodel')
+		request.user = self.user
+		response = BrowserItemsView.as_view()(request)
 
 		expected_items = [1, 2, 3]
 
@@ -133,14 +155,32 @@ class BrowserItemsViewTestCase(TestCase):
 				.values_list('id', flat=True))
 		)
 
+	def test_only_permitted_groups_have_access(self):
+		settings.CONTENT_BROWSER_RESTRICTED_TO = ('group1', 'group2')
+
+		rf = RequestFactory()
+		request = rf.get('/')
+		request.user = self.user
+
+		response = BrowserItemsView.as_view()(request)
+		self.assertEqual(403, response.status_code)
+
+	def test_permitted_groups_have_access(self):
+		settings.CONTENT_BROWSER_RESTRICTED_TO = ('group1', 'group2')
+		group = Group.objects.create(name='group1')
+		self.user.groups.add(group)
+
+		rf = RequestFactory()
+		request = rf.get('/')
+		request.user = self.user
+
+		response = BrowserItemsView.as_view()(request)
+		self.assertEqual(200, response.status_code)
+
 
 class BrowserItemsURLTestCase(TestCase):
+
 	urls = 'contentbrowser.urls'
 
 	def test_reverse_lookup(self):
 		self.assertEqual('/browse/items/', reverse('contentbrowser_browse_items'))
-
-	def test_browser_items_url(self):
-		c = Client()
-		response = c.get('/browse/items/')
-		self.assertEqual(200, response.status_code)

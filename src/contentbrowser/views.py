@@ -10,7 +10,6 @@ from core import ContentBrowser
 class BrowserItemsView(TemplateView):
     template_name = 'contentbrowser/browser_items.html'
 
-    @method_decorator(login_required)
     def get(self, *args, **kwargs):
         user_groups = self.request.user.groups.values_list('name', flat=True)
         CONTENT_BROWSER_RESTRICTED_TO = getattr(
