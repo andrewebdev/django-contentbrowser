@@ -45,11 +45,11 @@ class ContentBrowser(object):
 		ct = ContentType.objects.get(app_label=app, model=model_name)
 		return ct.model_class()
 
-	def get_items_for(self, ctype):
+	def get_items_for(self, ctype, refresh_cache=False):
 		"""
 		Returns a django queryset, containing all the valid items for ``ctype``
 		"""
-		if ctype not in self._querysets:
+		if ctype not in self._querysets or refresh_cache:
 			app, model_name = ctype.split('.')
 			ct = ContentType.objects.get(app_label=app, model=model_name)
 			ct_model = ct.model_class()

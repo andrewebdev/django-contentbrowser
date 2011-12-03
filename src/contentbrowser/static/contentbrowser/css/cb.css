@@ -45,7 +45,7 @@
     background: white;
     border: 1px solid #aaa;
     overflow: auto;
-    max-height: 250px;
+    max-height: 300px;
 }
 
 div.thumbnail_item {

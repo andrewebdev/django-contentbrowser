@@ -29,7 +29,8 @@ class BrowserItemsView(TemplateView):
         ctype = self.request.GET.get('ctype', None)
         cb = ContentBrowser()
         if ctype:
-            c['%s_items' % ctype.replace('.', '_')] = cb.get_items_for(ctype)
+            c['%s_items' % ctype.replace('.', '_')] = cb.get_items_for(
+                ctype, refresh_cache=True)
         else:
             c['empty_items'] = True
         return c
