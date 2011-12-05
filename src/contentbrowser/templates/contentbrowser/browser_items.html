@@ -1,23 +1,27 @@
 {% comment %}
-	A template that can be modified by the developer based on how he/she wants
+	A template that the developer should modify based on how he/she wants
 	the content types to be represented in the browser.
 
 	Copy this template to the same location in your project templates, and
 	start adding the custom html for your types.
 
-	The registered content items are passed to the context with the names
-	generated as: '<app_label>_<model>_items' (all lowercase)
+    context variables:
+
+        ctype - The name of the content type written as 'app.model'
+
+        page - This is a django pagination object. Read the django pagination
+        docs for more.
 
 {% endcomment %}
 
 
 {# Example #}
 
-{% if contentbrowser_demomodel_items %}
+{% if ctype == 'contentbrowser.demomodel' %}
 	{# ... html to render the here here ... #}
 {% endif %}
 
 
-{% if someapp_somemodel_items %}
+{% if ctype == 'someapp.somemodel' %}
 	{# ... html to render the type here ... #}
 {% endif %}
