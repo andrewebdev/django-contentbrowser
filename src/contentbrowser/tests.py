@@ -133,13 +133,22 @@ class BrowserItemsViewTestCase(TestCase):
 		response = BrowserItemsView.as_view()(request)
 		self.assertEqual(200, response.status_code)
 
-	def test_browser_items_view_context(self):
+	def test_browser_items_empty_context(self):
 		rf = RequestFactory()
 		request = rf.get('/')
 		request.user = self.user
 
 		response = BrowserItemsView.as_view()(request)
 		self.assertEqual(True, response.context_data['empty_items'])
+
+	def test_browser_items_context(self):
+		rf = RequestFactory()
+		request = rf.get('/?ctype=contentbrowser.demomodel')
+		request.user = self.user
+		response = BrowserItemsView.as_view()(request)
+
+		self.assertIn('page', response.context_data)
+		self.assertIn('ctype', response.context_data)
 
 	def test_browser_items_with_ctypes(self):
 		rf = RequestFactory()
@@ -148,12 +157,22 @@ class BrowserItemsViewTestCase(TestCase):
 		response = BrowserItemsView.as_view()(request)
 
 		expected_items = [1, 2, 3]
+		items = response.context_data['page'].object_list\
+			.values_list('id', flat=True)
 
-		self.assertEqual(
-			expected_items,
-			list(response.context_data['contentbrowser_demomodel_items']\
-				.values_list('id', flat=True))
-		)
+		self.assertEqual('contentbrowser.demomodel',
+			response.context_data['ctype'])
+
+		self.assertEqual(expected_items, list(items))
+
+	def test_browser_items_paginated(self):
+		rf = RequestFactory()
+		request = rf.get('/?ctype=contentbrowser.demomodel')
+		request.user = self.user
+		response = BrowserItemsView.as_view()(request)
+
+		self.assertEqual('Page',
+			response.context_data['page'].__class__.__name__)
 
 	def test_only_permitted_groups_have_access(self):
 		settings.CONTENT_BROWSER_RESTRICTED_TO = ('group1', 'group2')

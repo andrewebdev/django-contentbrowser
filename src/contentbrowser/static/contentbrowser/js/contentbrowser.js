@@ -51,4 +51,8 @@ django.jQuery(document).ready(function() {
         return cb.loadItems(django.jQuery(this).attr('href'));
     });
 
+    django.jQuery('#cb_items_panel .pagination a').live('click', function() {
+        return cb.loadItems(django.jQuery(this).attr('href'));
+    });
+
 });

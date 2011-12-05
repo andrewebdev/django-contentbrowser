@@ -13,6 +13,13 @@
     padding: 1em 0;
 }
 
+#contentbrowser .pagination {
+    clear: both;
+    text-align: center;
+    border-top: 1px solid #444;
+    padding-top: 0.5em;
+}
+
 #cb_actions_panel {
 }
 
@@ -45,7 +52,8 @@
     background: white;
     border: 1px solid #aaa;
     overflow: auto;
-    max-height: 300px;
+    min-height: 250px;
+    max-height: 350px;
 }
 
 div.thumbnail_item {

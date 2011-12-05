@@ -1,0 +1,17 @@
+{% load url from future %}
+
+<div class="pagination">
+    <span class="step-links">
+        {% if page.has_previous %}
+            <a href="{% url 'contentbrowser_browse_items' %}?ctype={{ ctype }}&page={{ page.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page.number }} of {{ page.paginator.num_pages }}
+        </span>
+
+        {% if page.has_next %}
+            <a href="{% url 'contentbrowser_browse_items' %}?ctype={{ ctype }}&page={{ page.next_page_number }}">next</a>
+        {% endif %}
+    </span>
+</div>
