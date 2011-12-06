@@ -1,7 +1,5 @@
 from django.views.generic import TemplateView
-from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.utils.decorators import method_decorator
 from django import http
 from django.conf import settings
 
@@ -32,10 +30,8 @@ class BrowserItemsView(TemplateView):
         ctype = self.request.GET.get('ctype', None)
         page = self.request.GET.get('page', 1)
 
-        categories = cbregistry.all()
-
         category = None
-        for cat in categories:
+        for cat in cbregistry:
             if cat.content_type == ctype:
                 category = cat()
                 break

@@ -73,9 +73,7 @@ class ContentBrowserRegistry(TestCase):
 		self.assertIn(DemoModelItems, classes)
 
 	def test_browser_title(self):
-		classes = cbregistry.all()
-
-		for cb in classes:
+		for cb in cbregistry:
 			if cb.content_type == 'contentbrowser.demomodel':
 				browser = cb()
 				break
@@ -85,7 +83,7 @@ class ContentBrowserRegistry(TestCase):
 	def test_browser_get_items(self):
 		request = self.rf.get('/')
 
-		for cat in cbregistry.all():
+		for cat in cbregistry:
 			if cat.content_type == 'contentbrowser.demomodel':
 				category = cat()
 				break
