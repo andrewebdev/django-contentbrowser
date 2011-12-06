@@ -5,7 +5,7 @@ from django.contrib.auth.models import User, Group
 from django.core.urlresolvers import reverse
 from django.conf import settings
 
-from core import ContentBrowser, _ContentBrowser
+from core import ContentBrowser, cbregistry
 from views import BrowserItemsView
 from templatetags.contentbrowser_tags import show_contentbrowser
 
@@ -22,17 +22,6 @@ class SecondDemoModel(models.Model):
 	is_visible = models.BooleanField(default=True)
 
 
-## Create some browsers
-class DemoModelBrowser(_ContentBrowser):
-	ctype = 'contentbrowser.demomodel'
-
-	def get_items(self):
-		return DemoModel.objects.all()
-
-
-CONTENT_BROWSER_TYPES = ('contentbrowser.demomodel', 'contentbrowser.seconddemomodel')
-
-
 ## Commence tests :)
 class DemoModelTestCase(TestCase):
 
@@ -41,63 +30,33 @@ class DemoModelTestCase(TestCase):
 			is_visible=True)
 
 
+@cbregistry.register
+class DemoModelItems(ContentBrowser):
+    content_type = 'contentbrowser.demomodel'
+    title = 'Demo Model'
+
+    def get_items(self, request):
+        return DemoModel.objects.all()
+
+
 class ContentBrowserTestCase(TestCase):
 
-	def setUp(self):
-		DemoModel.objects.create(
-			name='Demo 1', description='Demo 1 Description', is_visible=True)
-		DemoModel.objects.create(
-			name='Demo 2', description='Demo 2 Description', is_visible=True)
-		DemoModel.objects.create(
-			name='Demo 2', description='Demo 2 Description', is_visible=False)
+	def test_contentbrowser_class(self):
+		ContentBrowser
 
-		## Make sure the ContentBrowser is completely empty
-		self.cb = ContentBrowser(custom_types=CONTENT_BROWSER_TYPES)
+	def test_defaults(self):
+		self.assertEqual(None, ContentBrowser.title)
+		self.assertEqual(None, ContentBrowser.content_type)
 
-	def test_content_browser_models_registered_on_init(self):
-		cb = ContentBrowser(custom_types=CONTENT_BROWSER_TYPES)
-		self.assertEqual(
-			('contentbrowser.demomodel', 'contentbrowser.seconddemomodel'),
-			cb._registered_types)
+	def test_instance_get_items(self):
+		rf = RequestFactory()
+		request = rf.get('/')
 
-	def test_get_categories(self):
-		expected_list = [
-			{
-				'contenttype': 'contentbrowser.demomodel',
-				'verbose_name': 'Demo Model',
-				'verbose_name_plural': 'Demo Models'
-			},
-			{
-				'contenttype': 'contentbrowser.seconddemomodel',
-				'verbose_name': 'Second Demo Model',
-				'verbose_name_plural': 'Second Demo Models'
-			}
-		]
-		self.assertEqual(expected_list, self.cb.get_types())
-
-	def test_get_model_class(self):
-		self.assertEqual(DemoModel, self.cb.get_model_for('contentbrowser.demomodel'))
-
-	def test_get_items_for(self):
-		item_list = list(
-			self.cb.get_items_for('contentbrowser.demomodel')\
-			.values_list('id', flat=True))
-
-		self.assertEqual([1, 2, 3], item_list)
-
-	def test_get_items_for_with_custom_queryset(self):
-		self.cb = ContentBrowser(custom_types=CONTENT_BROWSER_TYPES)
-		qs = DemoModel.objects.filter(is_visible=True)
-		self.cb.set_queryset_for('contentbrowser.demomodel', qs)
-
-		item_list = list(
-			self.cb.get_items_for('contentbrowser.demomodel')\
-			.values_list('id', flat=True))
-		
-		self.assertEqual([1, 2], item_list)
+		cb = ContentBrowser()	
+		self.assertEqual(None, cb.get_items(request))
 
 
-class ContentBrowserInclusionTagTestCase(TestCase):
+class ContentBrowserRegistry(TestCase):
 
 	def setUp(self):
 		DemoModel.objects.create(
@@ -107,8 +66,34 @@ class ContentBrowserInclusionTagTestCase(TestCase):
 		DemoModel.objects.create(
 			name='Demo 2', description='Demo 2 Description', is_visible=False)
 
-		## Make sure the ContentBrowser is completely empty
-		self.cb = ContentBrowser(custom_types=CONTENT_BROWSER_TYPES)
+		self.rf = RequestFactory()
+
+	def test_browser_in_registry(self):
+		classes = cbregistry.all()
+		self.assertIn(DemoModelItems, classes)
+
+	def test_browser_title(self):
+		classes = cbregistry.all()
+
+		for cb in classes:
+			if cb.content_type == 'contentbrowser.demomodel':
+				browser = cb()
+				break
+
+		self.assertEqual('Demo Model', browser.title)
+
+	def test_browser_get_items(self):
+		request = self.rf.get('/')
+
+		for cat in cbregistry.all():
+			if cat.content_type == 'contentbrowser.demomodel':
+				category = cat()
+				break
+
+		expected_items = [1, 2, 3]
+		item_list = category.get_items(request).values_list('id', flat=True)
+
+		self.assertEqual(expected_items, list(item_list))
 
 
 class BrowserItemsViewTestCase(TestCase):
@@ -128,9 +113,6 @@ class BrowserItemsViewTestCase(TestCase):
 		# Create a test user instance
 		self.user = User.objects.create(username='user1', password='secret')
 		self.user.save()
-
-		## Make sure the ContentBrowser is completely empty
-		self.cb = ContentBrowser(custom_types=CONTENT_BROWSER_TYPES)
 
 	def test_browser_items_view_exists(self):
 		items_view = BrowserItemsView()
@@ -214,44 +196,4 @@ class BrowserItemsURLTestCase(TestCase):
 	def test_reverse_lookup(self):
 		self.assertEqual('/browse/items/', reverse('contentbrowser_browse_items'))
 
-
-class NewContentBrowserTestCase(TestCase):
-
-	def setUp(self):
-		DemoModel.objects.create(
-			name='Demo 1', description='Demo 1 Description', is_visible=True)
-		DemoModel.objects.create(
-			name='Demo 2', description='Demo 2 Description', is_visible=True)
-		DemoModel.objects.create(
-			name='Demo 2', description='Demo 2 Description', is_visible=False)
-
-		self.rf = RequestFactory()
-		
-	def test_create_browser_with_request(self):
-		request = self.rf.get('/')
-		demo_browser = DemoModelBrowser(request)
-
-	def test_model_browser(self):
-		request = self.rf.get('/')	
-		demo_browser = DemoModelBrowser(request)
-		self.assertEqual('contentbrowser.demomodel', demo_browser.ctype)
-
-	def test_get_items(self):
-		request = self.rf.get('/')
-		demo_browser = DemoModelBrowser(request)
-
-		expected_items = [1, 2, 3]
-		item_list = demo_browser.get_items().values_list('id', flat=True)
-
-		self.assertEqual(expected_items, list(item_list))
-
-	def test_contentbrowserclass_key_lookup_for_ctype(self):
-		request = self.rf.get('/')
-
-		cb_instance = _ContentBrowser['contentbrowser.demomodel'](request)
-
-		expected_items = [1, 2, 3]
-		item_list = cb_instance.get_items().values_list('id', flat=True)
-
-		self.assertEqual(expected_items, list(item_list))
 

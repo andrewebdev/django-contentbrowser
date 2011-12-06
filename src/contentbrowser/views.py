@@ -5,18 +5,8 @@ from django.utils.decorators import method_decorator
 from django import http
 from django.conf import settings
 
-from core import ContentBrowser
+from core import ContentBrowser, cbregistry
 
-
-## TODO: New view
-"""
-    New view will take the ctype GET var and check all __subclasses__ of
-    _ContentBrowser() to see if it finds a ctype attr in that class that
-    matches.
-
-    If so, we will create a new instance of the class using the request object
-    and return the results from get_items(). We will paginate this result.
-"""
 
 class BrowserItemsView(TemplateView):
     template_name = 'contentbrowser/browser_items.html'
@@ -42,13 +32,19 @@ class BrowserItemsView(TemplateView):
         ctype = self.request.GET.get('ctype', None)
         page = self.request.GET.get('page', 1)
 
-        cb = ContentBrowser()
+        categories = cbregistry.all()
 
-        if ctype:
+        category = None
+        for cat in categories:
+            if cat.content_type == ctype:
+                category = cat()
+                break
+
+        if ctype and category:
             CONTENT_BROWSER_ITEM_COUNT = getattr(
                 settings, 'CONTENT_BROWSER_ITEM_COUNT', 8)
 
-            item_list = cb.get_items_for(ctype, refresh_cache=True)
+            item_list = category.get_items(self.request)
             paginator = Paginator(item_list, CONTENT_BROWSER_ITEM_COUNT)
 
             try:
