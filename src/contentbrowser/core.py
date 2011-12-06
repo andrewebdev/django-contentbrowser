@@ -1,6 +1,32 @@
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 
+
+class _CTypeSubscriptable(type):
+
+	def __getitem__(self, ctype):
+		"""
+		We will cycle through all subclasses of this class, and find
+		the first subclass that matches ``ctype`` as a class attribute
+		"""
+		for cls in self.__subclasses__():
+			if cls.ctype == ctype:
+				return cls
+		return None
+
+
+class _ContentBrowser(object):
+	""" This will replace our current ContentBrowser class """
+	__metaclass__ = _CTypeSubscriptable
+	ctype = None
+
+	def __init__(self, request):
+		self.request = request
+
+	def get_items(self):
+		return None
+
+
 class ContentBrowser(object):
 	_cached_types = []
 	_querysets = {}

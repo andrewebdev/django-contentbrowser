@@ -8,6 +8,16 @@ from django.conf import settings
 from core import ContentBrowser
 
 
+## TODO: New view
+"""
+    New view will take the ctype GET var and check all __subclasses__ of
+    _ContentBrowser() to see if it finds a ctype attr in that class that
+    matches.
+
+    If so, we will create a new instance of the class using the request object
+    and return the results from get_items(). We will paginate this result.
+"""
+
 class BrowserItemsView(TemplateView):
     template_name = 'contentbrowser/browser_items.html'
 

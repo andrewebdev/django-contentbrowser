@@ -5,7 +5,7 @@ from django.contrib.auth.models import User, Group
 from django.core.urlresolvers import reverse
 from django.conf import settings
 
-from core import ContentBrowser
+from core import ContentBrowser, _ContentBrowser
 from views import BrowserItemsView
 from templatetags.contentbrowser_tags import show_contentbrowser
 
@@ -16,9 +16,19 @@ class DemoModel(models.Model):
 	description = models.TextField()
 	is_visible = models.BooleanField(default=False)
 
+
 class SecondDemoModel(models.Model):
 	name = models.CharField(max_length=20)
 	is_visible = models.BooleanField(default=True)
+
+
+## Create some browsers
+class DemoModelBrowser(_ContentBrowser):
+	ctype = 'contentbrowser.demomodel'
+
+	def get_items(self):
+		return DemoModel.objects.all()
+
 
 CONTENT_BROWSER_TYPES = ('contentbrowser.demomodel', 'contentbrowser.seconddemomodel')
 
@@ -203,3 +213,45 @@ class BrowserItemsURLTestCase(TestCase):
 
 	def test_reverse_lookup(self):
 		self.assertEqual('/browse/items/', reverse('contentbrowser_browse_items'))
+
+
+class NewContentBrowserTestCase(TestCase):
+
+	def setUp(self):
+		DemoModel.objects.create(
+			name='Demo 1', description='Demo 1 Description', is_visible=True)
+		DemoModel.objects.create(
+			name='Demo 2', description='Demo 2 Description', is_visible=True)
+		DemoModel.objects.create(
+			name='Demo 2', description='Demo 2 Description', is_visible=False)
+
+		self.rf = RequestFactory()
+		
+	def test_create_browser_with_request(self):
+		request = self.rf.get('/')
+		demo_browser = DemoModelBrowser(request)
+
+	def test_model_browser(self):
+		request = self.rf.get('/')	
+		demo_browser = DemoModelBrowser(request)
+		self.assertEqual('contentbrowser.demomodel', demo_browser.ctype)
+
+	def test_get_items(self):
+		request = self.rf.get('/')
+		demo_browser = DemoModelBrowser(request)
+
+		expected_items = [1, 2, 3]
+		item_list = demo_browser.get_items().values_list('id', flat=True)
+
+		self.assertEqual(expected_items, list(item_list))
+
+	def test_contentbrowserclass_key_lookup_for_ctype(self):
+		request = self.rf.get('/')
+
+		cb_instance = _ContentBrowser['contentbrowser.demomodel'](request)
+
+		expected_items = [1, 2, 3]
+		item_list = cb_instance.get_items().values_list('id', flat=True)
+
+		self.assertEqual(expected_items, list(item_list))
+
