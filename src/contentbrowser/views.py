@@ -28,6 +28,7 @@ class BrowserItemsView(TemplateView):
         c = super(BrowserItemsView, self).get_context_data(**kwargs)
 
         ctype = self.request.GET.get('ctype', None)
+        cb = self.request.GET.get('cb')
         page = self.request.GET.get('page', 1)
 
         category = None
@@ -54,6 +55,7 @@ class BrowserItemsView(TemplateView):
 
             c['ctype'] = ctype
             c['page'] = page
+            c['cb'] = cb
 
         else:
             c['empty_items'] = True
