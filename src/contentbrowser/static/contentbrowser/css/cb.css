@@ -20,13 +20,7 @@
     padding-top: 0.5em;
 }
 
-#cb_actions_panel {
-}
-
-#cb_actions_panel button {
-    width: 100%;
-    margin-bottom: 1px;
-}
+#cb_actions_panel { margin-bottom: 3px; }
 
 #cb_types_panel {
     padding: 5px;
