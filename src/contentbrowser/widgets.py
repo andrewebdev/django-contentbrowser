@@ -5,6 +5,7 @@ from django.conf import settings
 
 from contentbrowser.core import ContentBrowser, cbregistry
 
+
 STATIC_URL = getattr(settings, 'STATIC_URL')
 
 
