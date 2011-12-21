@@ -51,7 +51,12 @@ function ContentBrowser(options) {
 
 
     $cb_el.find('.cb_toggle_panels').click(function() {
-        $cb_el.find('.cb_panels').toggle(300);
+        var panels = $cb_el.find('.cb_panels');
+        if (panels.is(':visible')) {
+            panels.slideUp(300);
+        } else {
+            panels.slideDown(300);
+        }
         return false;
     });
 

@@ -7,7 +7,6 @@ from django.conf import settings
 
 from core import ContentBrowser, cbregistry
 from views import BrowserItemsView
-from templatetags.contentbrowser_tags import show_contentbrowser
 
 
 ## Create some test models that we can use
