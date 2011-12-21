@@ -1,0 +1,40 @@
+<div id="cb_{{ name }}" class="contentbrowser column span-flexible">
+
+    <div class="cb_actions_panel">
+        <button class="cb_toggle_panels">Hide/Show Browser</button>
+    </div>
+
+    <div class="cb_panels">
+
+        <div class="cb_types_panel column span-4">
+            <ul>
+                {% for type in contenttypes %}
+                <li class="ct_{{ type.contenttype }}">
+                    <a href="{% url contentbrowser_browse_items %}?ctype={{ type.contenttype }}">
+                        {{ type.name }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="cb_items_panel column span-13">
+            <p>Please select a category before you can view them here.</p>
+        </div>
+
+    </div>
+
+</div>
+
+<script type="text/javascript"><!--
+
+    cb_{{ name }} = new ContentBrowser({
+        field_id: '#id_{{ name }}',
+        cb_element: '#cb_{{ name }}',
+        name: '{{ name }}',
+        static_prefix: '{{ STATIC_URL }}'
+    });
+
+-->
+</script>
+
