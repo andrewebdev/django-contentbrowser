@@ -10,5 +10,6 @@ setup(
     package_dir={'': 'src'},
     install_requires=[
         'setuptools',
+        'django-appregister == 0.2',
     ],
 )
