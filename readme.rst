@@ -82,7 +82,8 @@ As an example, we will build a browser that allows the user to embed a username 
 In your main application you need to create a file called `cbitems.py`.
 Here we will create "a browser" for each content item or category.
 
-::
+.. code-block:: python
+
     from django.contrib.auth.models import User
     from contentbrowser.core import cbregistry, ContentBrowser
 
@@ -92,14 +93,18 @@ Here we will create "a browser" for each content item or category.
         title = 'Users'
 
         def get_items(self, request):
-            return User.objects.get()
+            return User.objects.filter(is_staff=True)
 
 So we just create a ContentBrowser subclass, decorated with `@cbregistry.register`.
 You need to supply the following attributes and methods:
 
-* `content_type`: A unique string for your content type. In our example I'm using the django app/model naming convention. (**Note**: This attribute will be renamed in future versions)
-* `title`: A simple title for your type. This is the title for the category in the browser.
-* `get_items()`: This returns the list of items to be displayed in your template.
+* `content_type` - A unique string for your content type. In our example I'm
+using the django ``<app>/<model>`` naming convention. 
+
+* ``title`` - A simple title for your type. This is the title for the category
+in the browser.
+
+* ``get_items()`` - Returns the list of items to be displayed in your template.
 
 
 2. Create the render template for items:
@@ -109,7 +114,8 @@ In your project templates dir create the template, `contentbrowser/browser_items
 This is a single template that will render *all* items for your registered categories.
 You basically put your html for the item list in a `{% if %}` block. For example:
 
-::
+.. code-block:: html
+
     {% if ctype == 'auth.user' %}
         <ul>
             {% for user in page.object_list %}
@@ -123,28 +129,35 @@ You basically put your html for the item list in a `{% if %}` block. For example
     {% endif %}
 
 
-`ctype` is the identifier we registered the item with earlier with the attribute `content_type`. Again this name will change in a future version.
+``ctype`` is the identifier we registered the item with earlier with the
+attribute ``content_type``.
 
-The items that is returned is paginated using django's built in pagination, hence the use of `page.object_list`.
+The items that is returned is paginated using django's built in pagination,
+hence the use of `page.object_list`.
 
-Whatever else you do in the forloop is up to you, since this is just how you specify how you want your list of items to be rendered. In our example we are showing a link with the username, firstname and lastname.
+Whatever else you do in the forloop is up to you, since this is just how you
+specify how you want your list of items to be rendered. In our example we are
+showing a link with the ``username``, ``firstname`` and ``lastname``.
 
-We do however want the contentbrowser to actually *do something* when we click on a username, and this is why we make use of the built in javascript lib.
-`{{ cb }}` here is the variable that passes the name of the contnetbrowser javascript object for the current widget.
-This object has a function `takeAction()`, which takes two arguments.
-First is the name of the action we want to take (more on that in the next section) and second is `self`. (The second is required for a quirk that I've not found a good solution for yet.)
+We do however want the contentbrowser to actually *do something* when we click
+on a username, and this is why we make use of the built in javascript
+ContentBrowser object.
+
+``{{ cb }}`` here is the variable that passes the name of the contnetbrowser javascript object for the current widget.
+
+This object has a function ``takeAction()``, which takes two arguments.
+
+First is the name of the action we want to take (more on that in the next
+section) and second is `self`.
 
 
 3. Create javascript actions
 ----------------------------
-Next we need to create our javascript actions.
-You will need the following file on your STATIC Path: `js/cb_actions.js`
+Next we need to create our javascript actions. In order to create your actions,
+creast the file, ``cb_actions.js``.
 
-Currently the location for this script is fixed, but in future you will be able to customize the path.
+.. code-block:: javascript
 
-In this script all you need to do is to add the following:
-
-::
     var cb_actions = {
 
         'insert_user': function(el, target) {
@@ -158,13 +171,16 @@ In this script all you need to do is to add the following:
     }
 
 
-And that should be that. (Above example not guaranteed to be bug-free ^_^)
+And that should be that.
 
 
 Custom Settings
 ===============
 
 * CONTENT_BROWSER_RESTRICTED_TO: Restricts which user groups are allowed access to the ContentBrowser view.
+
+* CONTENT_BROWSER_ACTIONS_PATH: A custom path to the filename that contains the
+contentbrowser actions. This defaults to ``{{ STATIC_URL }}js/cb_actions.js``
 
 .... To be continued ...
 

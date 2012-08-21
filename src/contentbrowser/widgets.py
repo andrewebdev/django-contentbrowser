@@ -7,6 +7,8 @@ from contentbrowser.core import ContentBrowser, cbregistry
 
 
 STATIC_URL = getattr(settings, 'STATIC_URL')
+CONTENT_BROWSER_ACTIONS_PATH = (settings, 'CONTENT_BROWSER_ACTIONS_PATH',
+    '%sjs/cb_actions.js' % STATIC_URL)
 
 
 class CBWidgetMixin(object):
@@ -26,7 +28,7 @@ class CBWidgetMixin(object):
             },
             js = (
                 '%scontentbrowser/js/contentbrowser.js' % STATIC_URL,
-                '%sjs/cb_actions.js' % STATIC_URL,
+                CONTENT_BROWSER_ACTIONS_PATH,
             )
         )
     media = property(_media)
